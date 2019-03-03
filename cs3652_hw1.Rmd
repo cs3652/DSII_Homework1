@@ -14,6 +14,8 @@ library(caret)
 library(boot)
 library(tidyverse)
 library(glmnet)
+library(ISLR)
+library(pls)
 ```
 
 a) Fit a linear model using least squares on the training data and calculate the mean square error using the test data. 
@@ -64,7 +66,7 @@ best_lambda = cv.out$lambda.min
 #Ridge regression model creation
 model = glmnet(xtrain, ytrain, alpha = 0,lambda = best_lambda)
 
-#Printing out the logistic model
+#Printing out the model
 model$beta
 ```
 
@@ -75,10 +77,10 @@ The lowest value of lambda, i.e. the best lambda, is 0.1478399
 pred2 = predict(model, s = best_lambda, newx = xtest)
 
 #Calculating Accuracy via MSE
-MSE = mean((pred2 - ytest)^2)
+MSE2 = mean((pred2 - ytest)^2)
 
 #Printing MSE
-print(MSE)
+print(MSE2)
 ```
 
 The mean squared error of the ridge regression using the cross validation approach is 0.51474. 
@@ -86,36 +88,72 @@ The mean squared error of the ridge regression using the cross validation approa
 c) Fit a lasso model on the training data, with lambda chosed by cross-validation. Report the test error, along with the number of non-zero coefficient estimates. 
 
 ```{r}
-#Using cross-validation to choose the tuning parameter ??
-set.seed (123)
-cv.out=cv.glmnet (xtrain,ytrain,alpha =1)
-plot(cv.out)
+#Using cross-validation to select lambda
+set.seed(123)
+cv.out3 = cv.glmnet(xtrain, ytrain, alpha = 1)
+plot(cv.out3)
 ```
 
 ```{r}
-bestlam=cv.out$lambda.min
-#Creating training model using lasso regression
-model =glmnet(xtrain,ytrain,alpha=1,lambda=bestlam)
-#Printing out the logistic model
-model$beta
+best_lambda3 = cv.out$lambda.min
+
+#lasso regression model using training data 
+model3 = glmnet(xtrain, ytrain, alpha = 1, lambda = best_lambda3)
+
+#Printing out the model
+model3$beta
 ```
 
 ```{r}
-#Fitting trainning model on test set
-pred=predict(model,s=bestlam ,newx=xtest)
-#Calculating Accuracy
-MSE=mean((pred-ytest)^2)
+#Fitting the above trainning model on the test dataset
+pred3 = predict(model, s = best_lambda3, newx = xtest)
+
+#Calculating Accuracy via MSE
+MSE3 = mean((pred3 - ytest)^2)
+
 #Printing MSE
-print(MSE)
+print(MSE3)
 ```
 
+The mean squared error using the lasso regression is 0.8191909
+
 ```{r}
-#Retrieving the lasso coefficients
-lasscoef=predict(model,type="coefficients",s=bestlam)[1:length(model$beta),]
-#Printing non zero coefficients
-lasscoef[lasscoef!=0]
+#lasso coefficients
+lasso_coef = predict(model3, type = "coefficients", s = best_lambda3)[1:length(model$beta),]
+
+#non zero coefficients
+lasso_coef[lasso_coef!= 0]
 ```
+
+The number of non-zero coefficients including the intercept is 19. 
 
 d) Fit a PCR model on the training data with M chosed by cross-validation. Report the test error, along with the value of M selected by cross-validation. 
 
+```{r}
+set.seed(123)
+
+pcr.mod <- pcr(Solubility~., data = train_data, scale = TRUE, validation = "CV")
+
+summary(pcr.mod)
+```
+
+```{r}
+validationplot(pcr.mod, val.type = "MSEP", legendpos = "topright")
+```
+
+```{r}
+#Fitting training model on the test dataset
+pred4.pcr <- predict(pcr.mod, newdata = test_data, ncomp = 228)
+
+#Calculating accuracy via MSE
+MSE4 <- mean((pred4.pcr - ytest)^2)
+
+#Printing MSE
+print(MSE4)
+```
+The mean squared error of the pcr model is 0.555889.
+The number of M's are 228. 
+
 e) Briefly discuss the results obtained in (a)~(d)
+
+Based on the results obtained, it seems that the ridge regression has the lowest mean squared error. Thus at it's face value, it seems that this model is the best in terms of describing the change in the outcome given the change in it's predictors. 
