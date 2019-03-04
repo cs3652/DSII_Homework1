@@ -95,7 +95,7 @@ plot(cv.out3)
 ```
 
 ```{r}
-best_lambda3 = cv.out$lambda.min
+best_lambda3 = cv.out3$lambda.min
 
 #lasso regression model using training data 
 model3 = glmnet(xtrain, ytrain, alpha = 1, lambda = best_lambda3)
@@ -106,7 +106,7 @@ model3$beta
 
 ```{r}
 #Fitting the above trainning model on the test dataset
-pred3 = predict(model, s = best_lambda3, newx = xtest)
+pred3 = predict(model3, s = best_lambda3, newx = xtest)
 
 #Calculating Accuracy via MSE
 MSE3 = mean((pred3 - ytest)^2)
@@ -115,35 +115,72 @@ MSE3 = mean((pred3 - ytest)^2)
 print(MSE3)
 ```
 
-The mean squared error using the lasso regression is 0.8191909
+The mean squared error using the lasso regression is 0.4952673.
 
 ```{r}
 #lasso coefficients
-lasso_coef = predict(model3, type = "coefficients", s = best_lambda3)[1:length(model$beta),]
+lasso_coef = predict(model3, type = "coefficients", s = best_lambda3)[1:ncol(train_data),]
 
 #non zero coefficients
-lasso_coef[lasso_coef!= 0]
+length(lasso_coef[lasso_coef!= 0])
+
+length(lasso_coef)
 ```
 
-The number of non-zero coefficients including the intercept is 19. 
+The number of non-zero coefficients including the intercept is 142. 
 
 d) Fit a PCR model on the training data with M chosed by cross-validation. Report the test error, along with the value of M selected by cross-validation. 
 
 ```{r}
-set.seed(123)
-
-pcr.mod <- pcr(Solubility~., data = train_data, scale = TRUE, validation = "CV")
+pcr.mod <- pcr(Solubility~.,
+              data = train_data,
+              scale = TRUE,
+              validation = "CV")
 
 summary(pcr.mod)
 ```
 
 ```{r}
-validationplot(pcr.mod, val.type = "MSEP", legendpos = "topright")
+ctrl1 <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
+
+set.seed(123)
+pcr.fit <- train(xtrain, ytrain,
+                 method = "pcr",
+                 tuneLength = 228,
+                 trControl = ctrl1,
+                 preProc = c("center", "scale"))
+
+trans <- preProcess(xtrain, method = c("center", "scale"))
+
+predy2.pcr2 <- predict(pcr.fit$finalModel, newdata = predict(trans, xtest),
+                       ncomp = pcr.fit$bestTune$ncomp)
+
+MSE4 <- mean((predy2.pcr2 - ytest)^2)
+
+print(MSE4)
 ```
 
 ```{r}
-#Fitting training model on the test dataset
-pred4.pcr <- predict(pcr.mod, newdata = test_data, ncomp = 228)
+set.seed(123)
+
+pcr.fit2 <- train(xtrain, ytrain,
+                  method = "pcr",
+                  tuneLength = 228,
+                  trControl = ctrl1,
+                  scale = TRUE)
+
+predy2.pcr3 <- predict(pcr.fit2$finalModel, newdata = xtest,
+                       ncomp = pcr.fit2$bestTune$ncomp)
+```
+
+```{r}
+ggplot(pcr.fit, highlight = TRUE) + theme_bw()
+```
+
+
+```{r}
+#Fitting training model on the test dataset with M=150 based on graph above.
+pred4.pcr <- predict(pcr.mod, newdata = test_data, ncomp = 150)
 
 #Calculating accuracy via MSE
 MSE4 <- mean((pred4.pcr - ytest)^2)
@@ -151,9 +188,10 @@ MSE4 <- mean((pred4.pcr - ytest)^2)
 #Printing MSE
 print(MSE4)
 ```
-The mean squared error of the pcr model is 0.555889.
-The number of M's are 228. 
+
+The mean squared error of the pcr model is 0.5483713.
+Based on the graph above, the M value selected by cross validation is 150. 
 
 e) Briefly discuss the results obtained in (a)~(d)
 
-Based on the results obtained, it seems that the ridge regression has the lowest mean squared error. Thus at it's face value, it seems that this model is the best in terms of describing the change in the outcome given the change in it's predictors. 
+Based on the results obtained, it seems that the lasso regression model has the lowest mean squared error, indicating that it is the best model. Thus at it's face value, it seems that this model is the best in terms of describing the change in the outcome given the change in it's predictors. The PCR model showed us that some of the components may be correlated an variance could be still kept low by reducing the number of components from 228 to 150. 
