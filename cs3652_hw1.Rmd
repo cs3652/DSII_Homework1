@@ -194,4 +194,4 @@ Based on the graph above, the M value selected by cross validation is 150.
 
 e) Briefly discuss the results obtained in (a)~(d)
 
-Based on the results obtained, it seems that the lasso regression model has the lowest mean squared error, indicating that it is the best model. Thus at it's face value, it seems that this model is the best in terms of describing the change in the outcome given the change in it's predictors. The PCR model showed us that some of the components may be correlated an variance could be still kept low by reducing the number of components from 228 to 150. 
+Based on the results obtained, it seems that the lasso regression model has the lowest mean squared error, indicating that it is the best model. Thus at it's face value, it seems that this model is the best in terms of describing the change in the outcome given the change in it's predictors (compared to the simple linear regression, ridge regression, and PCR). The PCR model showed us that some of the components may be correlated an variance could be still kept low by reducing the number of components from 228 to 150. 
