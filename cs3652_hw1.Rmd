@@ -38,7 +38,7 @@ summary(linear_train)
 pred <- predict(linear_train, newdata = test_data)
 
 #Calculating Mean Squared Error on the test data
-MSE = mean((test_data$Solubility - pred)^2)
+MSE <- mean((test_data$Solubility - pred)^2)
 
 print(MSE)
 ```
@@ -56,15 +56,15 @@ ytest <- test_data$Solubility
 
 #Using cross-validation to choose lambda (the tuning parameter)
 set.seed(123)
-cv.out = cv.glmnet(xtrain,ytrain,alpha = 0)
+cv.out <- cv.glmnet(xtrain,ytrain,alpha = 0)
 plot(cv.out)
 ```
 
 ```{r}
-best_lambda = cv.out$lambda.min
+best_lambda <- cv.out$lambda.min
 
 #Ridge regression model creation
-model = glmnet(xtrain, ytrain, alpha = 0,lambda = best_lambda)
+model <- glmnet(xtrain, ytrain, alpha = 0,lambda = best_lambda)
 
 #Printing out the model
 model$beta
@@ -74,10 +74,10 @@ The lowest value of lambda, i.e. the best lambda, is 0.1478399
 
 ```{r}
 #Fitting the above trainning model on test dataset 
-pred2 = predict(model, s = best_lambda, newx = xtest)
+pred2 <- predict(model, s = best_lambda, newx = xtest)
 
 #Calculating Accuracy via MSE
-MSE2 = mean((pred2 - ytest)^2)
+MSE2 <- mean((pred2 - ytest)^2)
 
 #Printing MSE
 print(MSE2)
@@ -90,15 +90,15 @@ c) Fit a lasso model on the training data, with lambda chosed by cross-validatio
 ```{r}
 #Using cross-validation to select lambda
 set.seed(123)
-cv.out3 = cv.glmnet(xtrain, ytrain, alpha = 1)
+cv.out3 <- cv.glmnet(xtrain, ytrain, alpha = 1)
 plot(cv.out3)
 ```
 
 ```{r}
-best_lambda3 = cv.out3$lambda.min
+best_lambda3 <- cv.out3$lambda.min
 
 #lasso regression model using training data 
-model3 = glmnet(xtrain, ytrain, alpha = 1, lambda = best_lambda3)
+model3 <- glmnet(xtrain, ytrain, alpha = 1, lambda = best_lambda3)
 
 #Printing out the model
 model3$beta
@@ -106,10 +106,10 @@ model3$beta
 
 ```{r}
 #Fitting the above trainning model on the test dataset
-pred3 = predict(model3, s = best_lambda3, newx = xtest)
+pred3 <- predict(model3, s = best_lambda3, newx = xtest)
 
 #Calculating Accuracy via MSE
-MSE3 = mean((pred3 - ytest)^2)
+MSE3 <- mean((pred3 - ytest)^2)
 
 #Printing MSE
 print(MSE3)
@@ -119,7 +119,7 @@ The mean squared error using the lasso regression is 0.4952673.
 
 ```{r}
 #lasso coefficients
-lasso_coef = predict(model3, type = "coefficients", s = best_lambda3)[1:ncol(train_data),]
+lasso_coef <- predict(model3, type = "coefficients", s = best_lambda3)[1:ncol(train_data),]
 
 #non zero coefficients
 length(lasso_coef[lasso_coef!= 0])
